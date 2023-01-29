@@ -7,12 +7,12 @@
 
 <% if(posts.length > 0) { %>
     <h1>Your posts</h1>
-    <% posts.forEach(function(e) { %>
 
+    <% posts.forEach(function(e) { %>
     <div class="postItem">
-        <h2> <%= e.postTitle %><span class="date"><%= e.postDate %></span></h2>
+        <h2> <%= e.title %><span class="date"><%= e.date %></span></h2>
         
-        <p class="postBody-short"> <%= e.postBody.substring(0,150) + " ..." %> <a href="/posts/<%= e.postLink %>">Read more</a></p>
+        <p class="postBody-short"> <%= e.content.substring(0,150) + " ..." %> <a href="/posts/<%= e.link %>">Read more</a></p>
     </div>
     <% }) %>
 <% } %>

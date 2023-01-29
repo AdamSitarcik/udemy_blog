@@ -5,6 +5,8 @@ const bodyParser = require("body-parser");
 const ejs = require("ejs");
 const lodash = require("lodash");
 const date = require(__dirname + "/date.js");
+const env = require("dotenv").config().parsed;
+const mongoose = require("mongoose");
 // const kebabCaseLink = require(__dirname + "/titleToKebab.js");
 
 
@@ -21,14 +23,84 @@ app.use(bodyParser.urlencoded({
 }));
 app.use(express.static("public"));
 
-let posts = [];
-let postLink = "";
+mongoose.set("strictQuery", false);
+mongoose.connect("mongodb://127.0.0.1:27017/blogDB");
+
+const postSchema = new mongoose.Schema({
+  title: String,
+  content: String,
+  link: String,
+  date: String
+});
+
+const BlogPost = mongoose.model("Post", postSchema);
 
 app.get("/", function (req, res) {
-  let currentDateTime = date.getDate();
-  res.render("home", {
-    homeContent: homeStartingContent,
-    posts: posts,
+  BlogPost.find({}, function (err, result) {
+    if (err) {
+      console.log(err);
+    } else {
+      res.render("home", {
+        homeContent: homeStartingContent,
+        posts: result,
+      });
+    }
+  })
+});
+
+
+
+app.get("/compose", function (req, res) {
+  res.render("compose", {
+    postTitleIfExists: "",
+    postContentIfExists: "",
+    warningTitleExists: ""
+  });
+});
+
+app.post("/compose", function (req, res) {
+  const postLink = lodash.kebabCase(req.body.postTitle.toLowerCase());
+  BlogPost.findOne({
+    link: postLink
+  }, async function (err, result) {
+    if (err) {
+      console.log(err);
+    } else {
+      if (result) {
+        res.render("compose", {
+          postTitleIfExists: req.body.postTitle,
+          postContentIfExists: req.body.postBody,
+          warningTitleExists: "Post with this title already exists!"
+        });
+      } else {
+        const newPost = new BlogPost({
+          title: req.body.postTitle,
+          content: req.body.postBody,
+          link: postLink,
+          date: date.getDate()
+        });
+        await newPost.save();
+        res.redirect("/");
+      }
+    }
+  });
+});
+
+app.get("/posts/:post", function (req, res) {
+  const postLink = req.params.post;
+  console.log(postLink);
+  BlogPost.findOne({
+    link: postLink
+  }, function (err, result) {
+    if (err) {
+      console.log(err);
+    } else {
+      res.render("post", {
+        postTitle: result.title,
+        postBody: result.content,
+        postDate: result.date
+      });
+    }
   });
 });
 
@@ -43,31 +115,6 @@ app.get("/contact", function (req, res) {
     contactContent: contactContent
   });
 });
-
-app.get("/compose", function (req, res) {
-  res.render("compose");
-});
-
-app.post("/compose", function (req, res) {
-  posts.push(req.body);
-  posts[posts.length - 1].postDate = date.getDate();
-  posts[posts.length - 1].postLink = lodash.kebabCase(posts[posts.length - 1].postTitle.toLowerCase());
-  res.redirect("/");
-});
-
-app.get("/posts/:post", function (req, res) {
-  if (posts.length > 0) {
-    posts.forEach(function (post) {
-      if (post.postLink === req.params.post) {
-        res.render("post", {
-          postTitle: post.postTitle,
-          postBody: post.postBody,
-          postDate: post.postDate
-        })
-      }
-    })
-  } 
-})
 
 app.listen(3000, function () {
   console.log("Server started on port 3000");
