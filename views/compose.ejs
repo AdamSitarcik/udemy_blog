@@ -5,8 +5,8 @@
 <form action="/compose" method="post">
     <div class="form-group">
         <label for="postTitle">Title</label>
-        <textarea type="text" name="postTitle" id="postTitle" class="form-control" placeholder="Enter the title..."
-            rows="1"><%= postTitleIfExists %></textarea>
+        <input type="text" name="postTitle" id="postTitle" class="form-control" placeholder="<%= postTitleIfExists %>"
+            rows="1">
         <span class="titleExists"><%= warningTitleExists%></span>
     </div>
     <div class="form-group">

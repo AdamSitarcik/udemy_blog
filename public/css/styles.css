@@ -47,3 +47,31 @@
     color: red;
 }
 
+
+.delete-icon {
+    color: white;
+}
+
+.title-div {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.title-div:hover .delete-icon {
+    color: rgb(201, 201, 201);
+    cursor: pointer;
+}
+
+.deleteBtn {
+    padding: 20px;
+    border: none;
+    color: white;
+    background-color: white;
+}
+
+
+.delete-date-div {
+    display: flex;
+    align-items: center;
+}
